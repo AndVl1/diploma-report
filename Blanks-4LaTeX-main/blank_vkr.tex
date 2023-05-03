@@ -1,0 +1,923 @@
+% !TeX TXS-program:bibliography = txs:///biber
+\documentclass[14pt, russian]{scrartcl}
+\let\counterwithout\relax
+\let\counterwithin\relax
+%\usepackage{lmodern}
+\usepackage{float}
+\usepackage{xcolor}
+\usepackage{extsizes}
+\usepackage{subfig}
+\usepackage[export]{adjustbox}
+\usepackage{tocvsec2} % возможность менять учитываемую глубину разделов в оглавлении
+\usepackage[subfigure]{tocloft}
+\usepackage[newfloat]{minted}
+\captionsetup[listing]{position=top}
+
+\usepackage{fancyvrb}
+\usepackage{ulem,bm,mathrsfs,ifsym} %зачеркивания, особо жирный стиль и RSFS начертание
+\usepackage{sectsty} % переопределение стилей подразделов
+%%%%%%%%%%%%%%%%%%%%%%%
+
+%%% Поля и разметка страницы %%%
+\usepackage{pdflscape}                              % Для включения альбомных страниц
+\usepackage{geometry}                               % Для последующего задания полей
+\geometry{a4paper,tmargin=2cm,bmargin=2cm,lmargin=3cm,rmargin=1cm} % тоже самое, но лучше
+
+%%% Математические пакеты %%%
+\usepackage{amsthm,amsfonts,amsmath,amssymb,amscd}  % Математические дополнения от AMS
+\usepackage{mathtools}                              % Добавляет окружение multlined
+\usepackage[perpage]{footmisc}
+%\usepackage{times}
+
+%%%% Установки для размера шрифта 14 pt %%%%
+%% Формирование переменных и констант для сравнения (один раз для всех подключаемых файлов)%%
+%% должно располагаться до вызова пакета fontspec или polyglossia, потому что они сбивают его работу
+%\newlength{\curtextsize}
+%\newlength{\bigtextsize}
+%\setlength{\bigtextsize}{13pt}
+\KOMAoptions{fontsize=14pt}
+
+\makeatletter
+\def\showfontsize{\f@size{} point}
+\makeatother
+
+%\makeatletter
+%\show\f@size                                       % неплохо для отслеживания, но вызывает стопорение процесса, если документ компилируется без команды  -interaction=nonstopmode 
+%\setlength{\curtextsize}{\f@size pt}
+%\makeatother
+
+%шрифт times
+\usepackage{tempora} %только для тех, у кого MikTeX последней версии и не ловит pscyr
+%\usepackage{pscyr} %для всех нормальных людей
+%\setmainfont[Ligatures={TeX,Historic}]{Times New Roman}
+
+   %%% Решение проблемы копирования текста в буфер кракозябрами
+%    \input glyphtounicode.tex
+%    \input glyphtounicode-cmr.tex %from pdfx package
+%    \pdfgentounicode=1
+    \usepackage{cmap}                               % Улучшенный поиск русских слов в полученном pdf-файле
+    \usepackage[T1]{fontenc}                       % Поддержка русских букв
+    \usepackage[utf8]{inputenc}                     % Кодировка utf8
+    \usepackage[english, main=russian]{babel}            % Языки: русский, английский
+%   \IfFileExists{pscyr.sty}{\usepackage{pscyr}}{}  % Красивые русские шрифты
+%\renewcommand{\rmdefault}{ftm}
+%%% Оформление абзацев %%%
+\usepackage{indentfirst}                            % Красная строка
+%\usepackage{eskdpz}
+
+%%% Таблицы %%%
+\usepackage{longtable}                              % Длинные таблицы
+\usepackage{multirow,makecell,array}                % Улучшенное форматирование таблиц
+\usepackage{booktabs}                               % Возможность оформления таблиц в классическом книжном стиле (при правильном использовании не противоречит ГОСТ)
+
+%%% Общее форматирование
+\usepackage{soulutf8}                               % Поддержка переносоустойчивых подчёркиваний и зачёркиваний
+\usepackage{icomma}                                 % Запятая в десятичных дробях
+
+
+
+%%% Изображения %%%
+\usepackage{graphicx}                               % Подключаем пакет работы с графикой
+\usepackage{wrapfig}
+
+%%% Списки %%%
+\usepackage{enumitem}
+
+%%% Подписи %%%
+\usepackage{caption}                                % Для управления подписями (рисунков и таблиц) % Может управлять номерами рисунков и таблиц с caption %Иногда может управлять заголовками в списках рисунков и таблиц
+%% Использование:
+%\begin{table}[h!]\ContinuedFloat - чтобы не переключать счетчик
+%\captionsetup{labelformat=continued}% должен стоять до самого caption
+%\caption{}
+% либо ручками \caption*{Продолжение таблицы~\ref{...}.} :)
+
+%%% Интервалы %%%
+\addto\captionsrussian{%
+  \renewcommand{\listingname}{Листинг}%
+}
+%%% Счётчики %%%
+\usepackage[figure,table,section]{totalcount}               % Счётчик рисунков и таблиц
+\DeclareTotalCounter{lstlisting}
+\usepackage{totcount}                               % Пакет создания счётчиков на основе последнего номера подсчитываемого элемента (может требовать дважды компилировать документ)
+\usepackage{totpages}                               % Счётчик страниц, совместимый с hyperref (ссылается на номер последней страницы). Желательно ставить последним пакетом в преамбуле
+
+%%% Продвинутое управление групповыми ссылками (пока только формулами) %%%
+%% Кодировки и шрифты %%%
+
+%   \newfontfamily{\cyrillicfont}{Times New Roman}
+%   \newfontfamily{\cyrillicfonttt}{CMU Typewriter Text}
+	%\setmainfont{Times New Roman}
+	%\newfontfamily\cyrillicfont{Times New Roman}
+	%\setsansfont{Times New Roman}                    %% задаёт шрифт без засечек
+%	\setmonofont{Liberation Mono}               %% задаёт моноширинный шрифт
+%    \IfFileExists{pscyr.sty}{\renewcommand{\rmdefault}{ftm}}{}
+%%% Интервалы %%%
+%linespread-реализация ближе к реализации полуторного интервала в ворде.
+%setspace реализация заточена под шрифты 10, 11, 12pt, под остальные кегли хуже, но всё же ближе к типографской классике. 
+\linespread{1.3}                    % Полуторный интервал (ГОСТ Р 7.0.11-2011, 5.3.6)
+%\renewcommand{\@biblabel}[1]{#1}
+
+%%% Гиперссылки %%%
+\usepackage{hyperref}
+
+%%% Выравнивание и переносы %%%
+\sloppy                             % Избавляемся от переполнений
+\clubpenalty=10000                  % Запрещаем разрыв страницы после первой строки абзаца
+\widowpenalty=10000                 % Запрещаем разрыв страницы после последней строки абзаца
+
+\makeatletter % малые заглавные, small caps shape
+\let\@@scshape=\scshape
+\renewcommand{\scshape}{%
+  \ifnum\strcmp{\f@series}{bx}=\z@
+    \usefont{T1}{cmr}{bx}{sc}%
+  \else
+    \ifnum\strcmp{\f@shape}{it}=\z@
+      \fontshape{scsl}\selectfont
+    \else
+      \@@scshape
+    \fi
+  \fi}
+\makeatother
+
+%%% Подписи %%%
+%\captionsetup{%
+%singlelinecheck=off,                % Многострочные подписи, например у таблиц
+%skip=2pt,                           % Вертикальная отбивка между подписью и содержимым рисунка или таблицы определяется ключом
+%justification=centering,            % Центрирование подписей, заданных командой \caption
+%}
+%%%        Подключение пакетов                 %%%
+\usepackage{ifthen}                 % добавляет ifthenelse
+%%% Инициализирование переменных, не трогать!  %%%
+\newcounter{intvl}
+\newcounter{otstup}
+\newcounter{contnumeq}
+\newcounter{contnumfig}
+\newcounter{contnumtab}
+\newcounter{pgnum}
+\newcounter{bibliosel}
+\newcounter{chapstyle}
+\newcounter{headingdelim}
+\newcounter{headingalign}
+\newcounter{headingsize}
+\newcounter{tabcap}
+\newcounter{tablaba}
+\newcounter{tabtita}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%% Область упрощённого управления оформлением %%%
+
+%% Интервал между заголовками и между заголовком и текстом
+% Заголовки отделяют от текста сверху и снизу тремя интервалами (ГОСТ Р 7.0.11-2011, 5.3.5)
+\setcounter{intvl}{3}               % Коэффициент кратности к размеру шрифта
+
+%% Отступы у заголовков в тексте
+\setcounter{otstup}{0}              % 0 --- без отступа; 1 --- абзацный отступ
+
+%% Нумерация формул, таблиц и рисунков
+\setcounter{contnumeq}{1}           % Нумерация формул: 0 --- пораздельно (во введении подряд, без номера раздела); 1 --- сквозная нумерация по всей диссертации
+\setcounter{contnumfig}{1}          % Нумерация рисунков: 0 --- пораздельно (во введении подряд, без номера раздела); 1 --- сквозная нумерация по всей диссертации
+\setcounter{contnumtab}{1}          % Нумерация таблиц: 0 --- пораздельно (во введении подряд, без номера раздела); 1 --- сквозная нумерация по всей диссертации
+
+%% Оглавление
+\setcounter{pgnum}{0}               % 0 --- номера страниц никак не обозначены; 1 --- Стр. над номерами страниц (дважды компилировать после изменения)
+
+%% Библиография
+\setcounter{bibliosel}{1}           % 0 --- встроенная реализация с загрузкой файла через движок bibtex8; 1 --- реализация пакетом biblatex через движок biber
+
+%% Текст и форматирование заголовков
+\setcounter{chapstyle}{1}           % 0 --- разделы только под номером; 1 --- разделы с названием "Глава" перед номером
+\setcounter{headingdelim}{1}        % 0 --- номер отделен пропуском в 1em или \quad; 1 --- номера разделов и приложений отделены точкой с пробелом, подразделы пропуском без точки; 2 --- номера разделов, подразделов и приложений отделены точкой с пробелом.
+
+%% Выравнивание заголовков в тексте
+\setcounter{headingalign}{0}        % 0 --- по центру; 1 --- по левому краю
+
+%% Размеры заголовков в тексте
+\setcounter{headingsize}{0}         % 0 --- по ГОСТ, все всегда 14 пт; 1 --- пропорционально изменяющийся размер в зависимости от базового шрифта
+
+%% Подпись таблиц
+\setcounter{tabcap}{0}              % 0 --- по ГОСТ, номер таблицы и название разделены тире, выровнены по левому краю, при необходимости на нескольких строках; 1 --- подпись таблицы не по ГОСТ, на двух и более строках, дальнейшие настройки: 
+%Выравнивание первой строки, с подписью и номером
+\setcounter{tablaba}{2}             % 0 --- по левому краю; 1 --- по центру; 2 --- по правому краю
+%Выравнивание строк с самим названием таблицы
+\setcounter{tabtita}{1}             % 0 --- по левому краю; 1 --- по центру; 2 --- по правому краю
+
+%%% Рисунки %%%
+\DeclareCaptionLabelSeparator*{emdash}{~--- }             % (ГОСТ 2.105, 4.3.1)
+\captionsetup[figure]{labelsep=emdash,font=onehalfspacing,position=bottom}
+
+%%% Таблицы %%%
+\ifthenelse{\equal{\thetabcap}{0}}{%
+    \newcommand{\tabcapalign}{\raggedright}  % по левому краю страницы или аналога parbox
+}
+
+\ifthenelse{\equal{\thetablaba}{0} \AND \equal{\thetabcap}{1}}{%
+    \newcommand{\tabcapalign}{\raggedright}  % по левому краю страницы или аналога parbox
+}
+
+\ifthenelse{\equal{\thetablaba}{1} \AND \equal{\thetabcap}{1}}{%
+    \newcommand{\tabcapalign}{\centering}    % по центру страницы или аналога parbox
+}
+
+\ifthenelse{\equal{\thetablaba}{2} \AND \equal{\thetabcap}{1}}{%
+    \newcommand{\tabcapalign}{\raggedleft}   % по правому краю страницы или аналога parbox
+}
+
+\ifthenelse{\equal{\thetabtita}{0} \AND \equal{\thetabcap}{1}}{%
+    \newcommand{\tabtitalign}{\raggedright}  % по левому краю страницы или аналога parbox
+}
+
+\ifthenelse{\equal{\thetabtita}{1} \AND \equal{\thetabcap}{1}}{%
+    \newcommand{\tabtitalign}{\centering}    % по центру страницы или аналога parbox
+}
+
+\ifthenelse{\equal{\thetabtita}{2} \AND \equal{\thetabcap}{1}}{%
+    \newcommand{\tabtitalign}{\raggedleft}   % по правому краю страницы или аналога parbox
+}
+
+\DeclareCaptionFormat{tablenocaption}{\tabcapalign #1\strut}        % Наименование таблицы отсутствует
+\ifthenelse{\equal{\thetabcap}{0}}{%
+    \DeclareCaptionFormat{tablecaption}{\tabcapalign #1#2#3}
+    \captionsetup[table]{labelsep=emdash}                       % тире как разделитель идентификатора с номером от наименования
+}{%
+    \DeclareCaptionFormat{tablecaption}{\tabcapalign #1#2\par%  % Идентификатор таблицы на отдельной строке
+        \tabtitalign{#3}}                                       % Наименование таблицы строкой ниже
+    \captionsetup[table]{labelsep=space}                        % пробельный разделитель идентификатора с номером от наименования
+}
+\captionsetup[table]{format=tablecaption,singlelinecheck=off,font=onehalfspacing,position=top,skip=-5pt}  % многострочные наименования и прочее
+\DeclareCaptionLabelFormat{continued}{Продолжение таблицы~#2}
+\setlength{\belowcaptionskip}{.2cm}
+\setlength{\intextsep}{0ex}
+
+%%% Подписи подрисунков %%%
+\renewcommand{\thesubfigure}{\asbuk{subfigure}}           % Буквенные номера подрисунков
+\captionsetup[subfigure]{font={normalsize},               % Шрифт подписи названий подрисунков (не отличается от основного)
+    labelformat=brace,                                    % Формат обозначения подрисунка
+    justification=centering,                              % Выключка подписей (форматирование), один из вариантов            
+}
+%\DeclareCaptionFont{font12pt}{\fontsize{12pt}{13pt}\selectfont} % объявляем шрифт 12pt для использования в подписях, тут же надо интерлиньяж объявлять, если не наследуется
+%\captionsetup[subfigure]{font={font12pt}}                 % Шрифт подписи названий подрисунков (всегда 12pt)
+
+%%% Настройки гиперссылок %%%
+
+\definecolor{linkcolor}{rgb}{0.0,0,0}
+\definecolor{citecolor}{rgb}{0,0.0,0}
+\definecolor{urlcolor}{rgb}{0,0,0}
+
+\hypersetup{
+    linktocpage=true,           % ссылки с номера страницы в оглавлении, списке таблиц и списке рисунков
+%    linktoc=all,                % both the section and page part are links
+%    pdfpagelabels=false,        % set PDF page labels (true|false)
+    plainpages=true,           % Forces page anchors to be named by the Arabic form  of the page number, rather than the formatted form
+    colorlinks,                 % ссылки отображаются раскрашенным текстом, а не раскрашенным прямоугольником, вокруг текста
+    linkcolor={linkcolor},      % цвет ссылок типа ref, eqref и подобных
+    citecolor={citecolor},      % цвет ссылок-цитат
+    urlcolor={urlcolor},        % цвет гиперссылок
+    pdflang={ru},
+}
+\urlstyle{same}
+%%% Шаблон %%%
+%\DeclareRobustCommand{\todo}{\textcolor{red}}       % решаем проблему превращения названия цвета в результате \MakeUppercase, http://tex.stackexchange.com/a/187930/79756 , \DeclareRobustCommand protects \todo from expanding inside \MakeUppercase
+\setlength{\parindent}{2.5em}                       % Абзацный отступ. Должен быть одинаковым по всему тексту и равен пяти знакам (ГОСТ Р 7.0.11-2011, 5.3.7).
+
+%%% Списки %%%
+% Используем дефис для ненумерованных списков (ГОСТ 2.105-95, 4.1.7)
+%\renewcommand{\labelitemi}{\normalfont\bfseries~{---}} 
+\renewcommand{\labelitemi}{\bfseries~{---}} 
+\setlist{nosep,%                                    % Единый стиль для всех списков (пакет enumitem), без дополнительных интервалов.
+    labelindent=\parindent,leftmargin=*%            % Каждый пункт, подпункт и перечисление записывают с абзацного отступа (ГОСТ 2.105-95, 4.1.8)
+}
+%%%%%%%%%%%%%%%%%%%%%%
+%\usepackage{xltxtra} % load xunicode
+
+\usepackage{ragged2e}
+\usepackage[explicit]{titlesec}
+\usepackage{placeins}
+\usepackage{xparse}
+\usepackage{csquotes}
+
+\usepackage{listingsutf8}
+\usepackage{url} %пакеты расширений
+\usepackage{algorithm, algorithmicx}
+\usepackage[noend]{algpseudocode}
+\usepackage{blkarray}
+\usepackage{chngcntr}
+\usepackage{tabularx}
+\usepackage[backend=biber, 
+    bibstyle=gost-numeric,
+    citestyle=nature]{biblatex}
+\newcommand*\template[1]{\text{<}#1\text{>}}
+\addbibresource{biblio.bib}
+  
+\titleformat{name=\section,numberless}[block]{\normalfont\large\centering}{}{0em}{#1}
+\titleformat{\section}[block]{\normalfont\large\bfseries\raggedright}{}{0em}{\thesection\hspace{0.25em}#1}
+\titleformat{\subsection}[block]{\normalfont\large\bfseries\raggedright}{}{0em}{\thesubsection\hspace{0.25em}#1}
+\titleformat{\subsubsection}[block]{\normalfont\large\bfseries\raggedright}{}{0em}{\thesubsubsection\hspace{0.25em}#1}
+
+\let\Algorithm\algorithm
+\renewcommand\algorithm[1][]{\Algorithm[#1]\setstretch{1.5}}
+%\renewcommand{\listingscaption}{Листинг}
+
+\usepackage{pifont}
+\usepackage{calc}
+\usepackage{suffix}
+\usepackage{csquotes}
+\DeclareQuoteStyle{russian}
+    {\guillemotleft}{\guillemotright}[0.025em]
+    {\quotedblbase}{\textquotedblleft}
+\ExecuteQuoteOptions{style=russian}
+\newcommand{\enq}[1]{\enquote{#1}}  
+\newcommand{\eng}[1]{\begin{english}#1\end{english}}
+% Подчиненные счетчики в окружениях http://old.kpfu.ru/journals/izv_vuz/arch/sample1251.tex
+\newcounter{cTheorem} 
+\newcounter{cDefinition}
+\newcounter{cConsequent}
+\newcounter{cExample}
+\newcounter{cLemma}
+\newcounter{cConjecture}
+\newtheorem{Theorem}{Теорема}[cTheorem]
+\newtheorem{Definition}{Определение}[cDefinition]
+\newtheorem{Consequent}{Следствие}[cConsequent]
+\newtheorem{Example}{Пример}[cExample]
+\newtheorem{Lemma}{Лемма}[cLemma]
+\newtheorem{Conjecture}{Гипотеза}[cConjecture]
+
+\renewcommand{\theTheorem}{\arabic{Theorem}}
+\renewcommand{\theDefinition}{\arabic{Definition}}
+\renewcommand{\theConsequent}{\arabic{Consequent}}
+\renewcommand{\theExample}{\arabic{Example}}
+\renewcommand{\theLemma}{\arabic{Lemma}}
+\renewcommand{\theConjecture}{\arabic{Conjecture}}
+%\makeatletter
+\NewDocumentCommand{\Newline}{}{\text{\\}}
+\newcommand{\sequence}[2]{\ensuremath \left(#1,\ \dots,\ #2\right)}
+
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+\renewcommand{\listalgorithmname}{Список алгоритмов}
+\floatname{algorithm}{Листинг}
+\renewcommand{\lstlistingname}{Листинг}
+\renewcommand{\thealgorithm}{\arabic{algorithm}}
+
+\newcommand{\refAlgo}[1]{(листинг \ref{#1})}
+\newcommand{\refImage}[1]{(рисунок \ref{#1})}
+
+\renewcommand{\theenumi}{\arabic{enumi}.}% Меняем везде перечисления на цифра.цифра	
+\renewcommand{\labelenumi}{\arabic{enumi}.}% Меняем везде перечисления на цифра.цифра
+\renewcommand{\theenumii}{\arabic{enumii}}% Меняем везде перечисления на цифра.цифра
+\renewcommand{\labelenumii}{(\arabic{enumii})}% Меняем везде перечисления на цифра.цифра
+\renewcommand{\theenumiii}{\roman{enumiii}}% Меняем везде перечисления на цифра.цифра
+\renewcommand{\labelenumiii}{(\roman{enumiii})}% Меняем везде перечисления на цифра.цифра
+%\newfontfamily\AnkaCoder[Path=src/fonts/]{AnkaCoder-r.ttf}
+\renewcommand{\labelitemi}{---}
+\renewcommand{\labelitemii}{---}
+
+%\usepackage{courier}
+
+\makeatletter
+\def\p@subsection{}
+\def\p@subsubsection{\thesection\,\thesubsection\,}
+\makeatother
+\newcommand{\prog}[1]{{\ttfamily\small#1}}
+
+\newcommand{\anonsection}[1]{\cleardoublepage
+\phantomsection
+\addcontentsline{toc}{section}{\protect\numberline{}#1}
+\section*{#1}\vspace*{2.5ex} % По госту положены 3 пустые строки после заголовка ненумеруемого раздела
+}
+\newcommand{\sectionbreak}{\clearpage}
+\renewcommand{\sectionfont}{\normalsize} % Сбиваем стиль оглавления в стандартный
+\renewcommand{\cftsecleader}{\cftdotfill{\cftdotsep}} % Точки в оглавлении напротив разделов
+
+\renewcommand{\cftsecfont}{\normalfont\large} % Переключение на times в содержании
+\renewcommand{\cftsubsecfont}{\normalfont\large} % Переключение на times в содержании
+
+\usepackage{caption} 
+%\captionsetup[table]{justification=raggedleft} 
+%\captionsetup[figure]{justification=centering,labelsep=endash}
+\usepackage{amsmath}    % \bar    (матрицы и проч. ...)
+\usepackage{amsfonts}   % \mathbb (символ для множества действительных чисел и проч. ...)
+\usepackage{mathtools}  % \abs, \norm
+    \DeclarePairedDelimiter\abs{\lvert}{\rvert} % операция модуля
+    \DeclarePairedDelimiter\norm{\lVert}{\rVert} % операция нормы
+\DeclareTextCommandDefault{\textvisiblespace}{%
+  \mbox{\kern.06em\vrule \@height.3ex}%
+  \vbox{\hrule \@width.3em}%
+  \hbox{\vrule \@height.3ex}}    
+\newsavebox{\spacebox}
+\begin{lrbox}{\spacebox}
+\verb*! !
+\end{lrbox}
+\newcommand{\aspace}{\usebox{\spacebox}}
+\DeclareTotalCounter{listing}
+
+\makeatletter
+\renewcommand*{\p@subsubsection}{}
+\makeatother
+    
+\begin{document}
+\sloppy
+
+\def\figurename{Рисунок}
+
+\begin{titlepage}
+\thispagestyle{empty}
+\newpage
+
+\vspace*{-30pt}
+\hspace{-45pt}
+\begin{minipage}{0.17\textwidth}
+\hspace*{-20pt}\centering
+\includegraphics[width=1.3\textwidth]{emblem.png}
+\end{minipage}
+\begin{minipage}{0.82\textwidth}\small \textbf{
+\vspace*{-0.7ex}
+\hspace*{-10pt}\centerline{Министерство науки и высшего образования Российской Федерации}
+\vspace*{-0.7ex}
+\centerline{Федеральное государственное бюджетное образовательное учреждение }
+\vspace*{-0.7ex}
+\centerline{высшего образования}
+\vspace*{-0.7ex}
+\centerline{<<Московский государственный технический университет}
+\vspace*{-0.7ex}
+\centerline{имени Н.Э. Баумана}
+\vspace*{-0.7ex}
+\centerline{(национальный исследовательский университет)>>}
+\vspace*{-0.7ex}
+\centerline{(МГТУ им. Н.Э. Баумана)}}
+\end{minipage}
+
+\vspace{-2pt}
+\hspace{-34.5pt}\rule{\textwidth}{0.5pt}
+
+\vspace*{-18.3pt}
+\hspace{-34.5pt}\rule{\textwidth}{2.5pt}
+ 
+\vspace{0.5ex}
+\noindent \small ФАКУЛЬТЕТ\hspace{80pt} <<Информатика и системы управления>>
+
+\vspace*{-16pt}
+\hspace{35pt}\rule{0.855\textwidth}{0.4pt}
+
+\vspace{0.5ex}
+\noindent \small КАФЕДРА\hspace{50pt} <<Теоретическая информатика и компьютерные технологии>>
+
+\vspace*{-16pt}
+\hspace{25pt}\rule{0.875\textwidth}{0.4pt}
+ 
+ 
+\vspace{3em}
+ 
+\begin{center}
+\Large \bf{РАСЧЕТНО-ПОЯСНИТЕЛЬНАЯ ЗАПИСКА\\\textbf{\textit{К ВЫПУСКНОЙ КВАЛИФИКАЦИОННОЙ РАБОТЕ\\НА ТЕМУ:}} \\}
+\end{center}
+
+\vspace*{-6ex} 
+\begin{center}
+\Large{\textit{\textbf{<<Разработка мультиплатформенного клиентского }}}
+
+\vspace*{-3ex}
+\rule{1\textwidth}{1.2pt}
+
+\vspace*{-1ex} 
+\Large{\textit{\textbf{приложения>>}}}
+
+\vspace*{-3ex}
+\rule{1\textwidth}{1.2pt}
+
+\vspace*{-0.2ex}
+\rule{1\textwidth}{1.2pt}
+
+\vspace*{-0.2ex}
+\rule{1\textwidth}{1.2pt}
+
+\vspace*{-0.2ex}
+\rule{1\textwidth}{1.2pt}
+\end{center}
+ 
+\vspace{\fill}
+ 
+
+\newlength{\ML}
+\settowidth{\ML}{«\underline{\hspace{0.7cm}}» \underline{\hspace{2cm}}}
+
+\noindent Студент \underline{\hspace{1.5cm}} \hfill \underline{\hspace{4cm}}\quad
+\underline{\hspace{4cm}}
+
+\vspace{-2.1ex}
+\noindent\hspace{9ex}\scriptsize{(Группа)}\normalsize\hspace{170pt}\hspace{2ex}\scriptsize{(Подпись, дата)}\normalsize\hspace{30pt}\hspace{6ex}\scriptsize{(И.О. Фамилия)}\normalsize
+
+\bigskip
+
+\noindent Руководитель ВКР \hfill \underline{\hspace{4cm}}\quad
+\underline{\hspace{4cm}}
+
+\vspace{-2ex}
+\noindent\hspace{13.5ex}\normalsize\hspace{170pt}\hspace{2ex}\scriptsize{(Подпись, дата)}\normalsize\hspace{30pt}\hspace{6ex}\scriptsize{(И.О. Фамилия)}\normalsize
+\bigskip
+
+\noindent Консультант \hfill \underline{\hspace{4cm}}\quad
+\underline{\hspace{4cm}}
+
+\vspace{-2ex}
+\noindent\hspace{13.5ex}\normalsize\hspace{170pt}\hspace{2ex}\scriptsize{(Подпись, дата)}\normalsize\hspace{30pt}\hspace{6ex}\scriptsize{(И.О. Фамилия)}\normalsize
+\bigskip
+
+\noindent Консультант \hfill \underline{\hspace{4cm}}\quad
+\underline{\hspace{4cm}}
+
+\vspace{-2ex}
+\noindent\hspace{13.5ex}\normalsize\hspace{170pt}\hspace{2ex}\scriptsize{(Подпись, дата)}\normalsize\hspace{30pt}\hspace{6ex}\scriptsize{(И.О. Фамилия)}\normalsize
+
+\bigskip
+
+\noindent Нормоконтролер \hfill \underline{\hspace{4cm}}\quad
+\underline{\hspace{4cm}}
+
+\vspace{-2ex}
+\noindent\hspace{13.5ex}\normalsize\hspace{170pt}\hspace{2ex}\scriptsize{(Подпись, дата)}\normalsize\hspace{30pt}\hspace{6ex}\scriptsize{(И.О. Фамилия)}\normalsize
+\vfill
+
+%\vspace{\fill}
+ 
+
+
+\begin{center}
+\textsl{2023 г.}
+\end{center}
+\end{titlepage}
+
+%\renewcommand{\ttdefault}{pcr}
+
+\setlength{\tabcolsep}{3pt}
+\newpage
+\setcounter{page}{2}
+%----------------------------------------------------------------------------
+%                  ОТСЮДА --- СОБСТВЕННО ТЕКСТ
+%----------------------------------------------------------------------------
+\section*{АННОТАЦИЯ}
+
+Темой данной работы является <<Рарзаботка мультиплатформенного клиентского приложения>>. Объем данной работы составляет~\pageref{TotPages} страниц.
+
+Основной объект исследование --- разбор существующих технологий для разработки приложений под несколько платформ и разработка соответствующего приложения на основе одной из этих технологий.
+
+Данная работа состоит из \totalsections{} глав. Первая глава посвящена разбору наиболее популярных на данный момент техлонолий. Во вторая главе более подробно описана выбранная для написания кода технология. В третьей главе описан процесс разработки приложения с использованием выбранной технологии. В четвертой главе описан процесс тестирования и достигнутые результаты.
+
+Работа содержит \totallistings{} листингов, \totaltables{} таблиц и \totalfigures{} рисунков.
+
+\newpage
+\renewcommand\contentsname{\hfill{\normalfont{СОДЕРЖАНИЕ}}\hfill}  %Оглавление
+\tableofcontents
+\newpage
+\anonsection{ВВЕДЕНИЕ}  %Введение
+
+В современном мире разработки мобильных приложений становится все более популярным явлением, и многие компании сталкиваются с задачей выбора подходящей технологии для создания мультиплатформенных продуктов. В данной работе представлен обзор существующих технологий для кросс-платформенной разработки и анализ их основных преимуществ и недостатков. Особое внимание уделяется технологии Kotlin Multiplatform, выбранной в качестве основы для разработки мобильного приложения.
+
+В первой части работы представлен краткий обзор предметной области и существующих технологий, таких как нативная разработка, Xamarin, React Native, Flutter и Kotlin Multiplatform. Описаны причины выбора Kotlin Multiplatform для разработки приложения.
+
+Во второй части исследуется технология Kotlin Multiplatform. Описываются основные характеристики языка Kotlin, его возможности в контексте разработки для различных платформ, а также процесс компиляции под разные целевые платформы.
+
+Третья часть работы посвящена разработке мультиплатформенного приложения с использованием выбранной технологии. Рассматриваются настройка проекта, подключение библиотек, а также написание общего и платформенного кода. Описывается процесс интеграции кода на Kotlin Multiplatform в проекты для Android и iOS, подключение сетевых запросов и баз данных, а также выбор подходящего фреймворка для создания пользовательского интерфейса.
+
+Таким образом, данная работа представляет собой комплексное исследование технологий для разработки мультиплатформенных приложений и практическую реализацию одного из таких приложений с использованием технологии Kotlin Multiplatform. Результаты работы могут быть полезными для специалистов в области разработки мобильных приложений, а также компаний, стоящих перед выбором технологии для своих проектов.
+
+\section{Обзор предметной области}
+
+\subsection{Введение в разработку под множесто платформ}
+
+В современном мире разработки мобильных приложений одной из ключевых задач является создание программного продукта, который будет работать на различных платформах и устройствах. Это стало возможным благодаря появлению мультиплатформенных технологий и инструментов, которые позволяют разрабатывать приложения с использованием единого кода для нескольких операционных систем, таких как iOS и Android.
+
+Разработка под множество платформ предоставляет целый ряд преимуществ. Во-первых, она позволяет сократить время разработки, так как разработчикам не нужно создавать отдельные версии приложения для каждой платформы. Во-вторых, такой подход снижает затраты на разработку и поддержку, так как требуется меньше ресурсов для создания и обновления приложений. В-третьих, мультиплатформенные приложения позволяют охватить более широкую аудиторию, так как они могут работать на разных устройствах и операционных системах.
+
+Однако стоит учесть, что разработка под множество платформ может иметь свои недостатки, такие как возможные компромиссы в производительности и доступности некоторых платформенных возможностей. Поэтому выбор подходящей технологии является критически важным этапом в процессе разработки мультиплатформенного приложения.
+
+В последние годы появилось множество технологий, предназначенных для кросс-платформенной разработки, каждая из которых имеет свои особенности и преимущества. В данной работе будет проведен обзор пяти основных технологий, которые сегодня активно используются разработчиками:
+
+\begin{enumerate}    
+    \item Нативная разработка --- это создание приложений с использованием языков и инструментов, специфических для каждой платформы. Этот подход обеспечивает наилучшую производительность и доступ ко всем платформенным возможностям, однако требует значительных ресурсов и времени на разработку отдельных приложений для каждой платформы.
+    \item Xamarin --- это инструмент для кросс-платформенной разработки на языке C\#, который позволяет создавать приложения для iOS, Android и Windows с использованием единого кода. Xamarin обеспечивает хорошую производительность и доступ к платформенным возможностям, но может потребовать дополнительных усилий для адаптации пользовательского интерфейса под каждую платформу.
+    \item React Native --- это фреймворк для разработки мобильных приложений на основе JavaScript и React, который позволяет создавать нативные приложения с использованием общего кода для iOS и Android. React Native предлагает быструю разработку и упрощенную интеграцию с веб-технологиями, однако может иметь некоторые ограничения в производительности и доступности платформенных возможностей.
+    \item Flutter --- это фреймворк от Google для разработки мультиплатформенных приложений с использованием языка Dart. Он предлагает высокую производительность, быструю разработку и консистентный пользовательский интерфейс благодаря своему собственному графическому движку, который рендерит интерфейс независимо от платформы. Однако Flutter имеет свои ограничения, в частности, он может не поддерживать некоторые специфичные платформенные возможности, и вам может потребоваться время на изучение языка Dart.
+    \item Kotlin Multiplatform --- это технология от JetBrains, которая позволяет использовать одну кодовую базу на языке Kotlin для создания мультиплатформенных приложений. Этот подход обеспечивает хорошую производительность и доступ к платформенным возможностям, а также позволяет разработчикам использовать преимущества языка Kotlin для написания кросс-платформенного кода. Однако Kotlin Multiplatform является довольно молодой технологией и может иметь ограниченную экосистему библиотек и инструментов по сравнению с другими технологиями.
+\end{enumerate}
+
+В данной работе будет проведен подробный обзор каждой из этих технологий, с акцентом на их особенности, преимущества и недостатки. После изучения этих технологий, разработчики смогут принять обоснованное решение о выборе подходящей технологии для своего мультиплатформенного проекта.
+
+Цель данной работы заключается в том, чтобы дать общее представление о современных подходах и технологиях кросс-платформенной разработки, а также помочь разработчикам определиться с наиболее подходящим инструментом для их конкретных проектов, исходя из требований к производительности, доступности платформенных возможностей и других факторов.
+
+\subsection{Обзор технологий}
+
+\subsubsection{Нативная разработка}
+
+Нативная разработка предполагает создание приложений с использованием официальных инструментов, языков программирования и библиотек, предоставляемых разработчиками мобильных операционных систем, таких как iOS и Android. В этом контексте рассмотрим нативную разработку для каждой из этих платформ отдельно:
+
+\begin{itemize}
+    \item Android
+
+    Нативная разработка для Android включает использование языков программирования Java и Kotlin, а также инструментов, предоставляемых Google. Java был основным языком разработки для Android с момента его создания, но в последнее время Kotlin стал все более популярным благодаря своей лаконичности, современным функциям и обратной совместимости с Java. В 2017 году Google объявил Kotlin официальным языком разработки для Android.
+
+    Android Studio является официальной средой разработки (IDE) для создания нативных приложений под Android. Она предоставляет разработчикам доступ ко всем инструментам, необходимым для проектирования, разработки, тестирования и отладки приложений для Android-устройств.
+    \item iOS
+
+    Нативная разработка для iOS включает использование языков программирования Swift и Objective-C, а также инструментов, предоставляемых Apple. Swift является современным и мощным языком программирования, разработанным Apple специально для создания приложений под iOS, macOS, watchOS и tvOS. Objective-C --- это более старый язык, который использовался для разработки приложений под iOS до появления Swift, и до сих пор поддерживается Apple.
+
+    Xcode является официальной средой разработки (IDE) для создания нативных приложений под iOS. Она предоставляет разработчикам доступ ко всем инструментам, необходимым для проектирования, разработки, тестирования и отладки приложений для Apple-устройств.
+\end{itemize}
+
+Нативная разработка имеет ряд преимуществ, таких как высокая производительность, оптимальное использование платформенных возможностей и лучший пользовательский опыт благодаря применению стандартных элементов пользовательского интерфейса и поведения, специфичных для каждой платформы.
+
+Однако нативная разработка также имеет некоторые недостатки, среди которых:
+
+\begin{enumerate}
+    \item Дублирование кода: Разработка отдельных приложений для iOS и Android может привести к дублированию кода, особенно если приложения имеют схожую функциональность на обеих платформах. Это может увеличить время разработки и затраты на поддержку приложений.
+    \item Выше стоимость разработки и поддержки: Нативная разработка требует наличия разработчиков, специализирующихся на каждой платформе, что может привести к большему количеству затрат на зарплаты и обучение, а также увеличению времени на обновление и поддержку приложений.
+    \item Сложность синхронизации функций и исправления ошибок: Поскольку приложения разрабатываются на разных языках программирования и используют разные библиотеки, синхронизация новых функций и исправление ошибок может быть сложным процессом. Разработчикам нужно уделять больше времени на координацию между командами и проверку того, что изменения в одной версии приложения не вызывают проблем в другой версии.
+    \item Медленное внедрение новых технологий: В силу того, что нативные приложения тесно связаны с конкретной платформой, разработчики могут столкнуться с ограничениями, когда дело доходит до внедрения новых технологий или адаптации к изменениям на рынке. Это может замедлить инновационный процесс и снизить конкурентоспособность приложения.
+\end{enumerate}
+
+В связи с вышеуказанными недостатками нативной разработки, многие разработчики и компании начали искать альтернативные решения для создания мультиплатформенных приложений. Одним из таких решений является кросс-платформенная разработка, которая предлагает разработчикам возможность использовать один и тот же код для создания приложений, работающих на разных платформах.
+
+\subsubsection{Xamarin}
+
+Xamarin\cite{xamarin} --- это платформа кросс-платформенной разработки, созданная компанией Xamarin, которую впоследствии приобрела Microsoft. Xamarin позволяет разработчикам создавать мобильные приложения для iOS, Android и Windows с использованием единой кодовой базы на языке программирования C\# и .NET-фреймворка.
+
+Основные особенности и преимущества Xamarin:
+\begin{enumerate}
+    \item Общий код: Xamarin использует общую кодовую базу для бизнес-логики и частично для пользовательского интерфейса, что позволяет разработчикам снизить дублирование кода и упростить поддержку приложений на разных платформах.
+    \item Производительность: Xamarin обеспечивает близкую к нативной производительность, так как использует платформенно-специфичные элементы пользовательского интерфейса и обращается к нативным API для доступа к возможностям устройства.
+    \item Интеграция с Visual Studio: Xamarin тесно интегрирован с Visual Studio, популярной средой разработки от Microsoft, что позволяет разработчикам использовать знакомые инструменты и рабочие процессы. Xamarin также доступен для пользователей Visual Studio for Mac, обеспечивая поддержку разработки на macOS.
+    \item Обширная библиотека компонентов: Xamarin предоставляет разработчикам доступ к богатой библиотеке компонентов, которые облегчают реализацию различных функций приложения и интеграцию с внешними сервисами.
+    \item Поддержка Xamarin.Forms: Xamarin.Forms – это дополнительный фреймворк для создания пользовательского интерфейса, который позволяет разработчикам создавать общий пользовательский интерфейс для iOS, Android и Windows с использованием XAML-разметки. Это упрощает разработку и сокращает время на создание интерфейса для каждой платформы.
+\end{enumerate}
+
+Однако, есть и некоторые недостатки при использовании Xamarin:
+
+\begin{enumerate}
+    \item Размер приложения: приложения, созданные с использованием Xamarin, могут иметь больший размер по сравнению с нативными приложениями, так как они включают дополнительные библиотеки и среду выполнения Mono. Это может привести к дольше времени загрузки приложений и большему использованию ресурсов устройства.
+    \item Отставание в поддержке новых возможностей платформ: Xamarin может не сразу поддерживать новые возможности и API, представленные в новых версиях iOS или Android. Это может ограничить разработчиков в использовании самых актуальных функций операционных систем.
+    \item Зависимость от Microsoft и сообщества: Разработчики, использующие Xamarin, зависят от поддержки и обновлений со стороны Microsoft, а также от сообщества разработчиков. В случае возникновения проблем, разработчики могут столкнуться с задержками в решении проблем или ограниченной доступностью ресурсов для обучения.
+    \item Сложность в создании сложных пользовательских интерфейсов: хотя Xamarin.Forms позволяет создавать общий пользовательский интерфейс для разных платформ, реализация сложных и высоко индивидуализированных пользовательских интерфейсов может быть более трудоемкой. В таких случаях разработчикам может потребоваться использовать платформо-специфические элементы и код, что увеличивает сложность проекта.
+    \item Необходимость знания платформо-специфических API и концепций: хотя Xamarin позволяет использовать единую кодовую базу на C\#, разработчикам все равно нужно разбираться в платформо-специфических API и концепциях для реализации некоторых функций или для оптимизации производительности приложений.
+\end{enumerate}
+
+Подводя итог, Xamarin является мощным инструментом для кросс-платформенной разработки, который подходит для относительно небольших проектов с общей бизнес-логикой и пользовательским интерфейсом на разных платформах. Однако, данный инструмент на текущий момент уже не является достаточно популярным, что может сказаться на поиске кадров для поддержки существующих приложений, так что его стоит использовать только при условии, что разрабатывается относиьельно небольшое приложение не для широкого использования.
+
+\subsubsection{React Native}
+
+React Native --- это популярный кросс-платформенный фреймворк, который позволяет создавать мобильные приложения для iOS и Android, используя JavaScript и React. Он предоставляет разработчикам возможность писать одну кодовую базу, которая работает на обеих платформах, что значительно сокращает время разработки и упрощает поддержку приложений.
+
+Преимущества React Native:
+
+\begin{enumerate}
+    \item Один язык программирования: React Native позволяет использовать JavaScript, один из самых популярных и широко используемых языков программирования, что облегчает доступ к разработке приложений для многих разработчиков.
+    \item React: Фреймворк использует React, известный своей производительностью и модульностью, что позволяет разработчикам быстро создавать сложные и отзывчивые пользовательские интерфейсы с использованием компонентного подхода.
+    \item Горячая перезагрузка и быстрое обновление: React Native поддерживает возможность горячей перезагрузки~\cite{rnHotReload}, что позволяет разработчикам видеть изменения в коде в реальном времени без необходимости перезагрузки приложения. Это значительно ускоряет процесс разработки и улучшает производительность.
+    \item Большое сообщество и экосистема: React Native имеет большое и активное сообщество разработчиков, что обеспечивает быстрое решение проблем, обширные ресурсы для обучения и большой выбор сторонних библиотек и плагинов для упрощения разработки.
+    \item Доступ к платформо-специфическим API~\cite{rnPlatform}: React Native предоставляет доступ к платформо-специфическим API и нативным компонентам через модули, что позволяет разработчикам использовать функциональность и возможности конкретных платформ.
+\end{enumerate}
+
+Недостатки React Native:
+
+\begin{enumerate}
+    \item Производительность: Хотя React Native обеспечивает достаточно высокую производительность для большинства приложений, некоторые приложения с интенсивными графическими или вычислительными операциями могут столкнуться с проблемами производительности. В таких случаях нативная разработка может предоставить лучшие результаты. ~\cite{Performance}
+    \item Нативные модули и библиотеки: Не все платформо-специфические API и нативные библиотеки доступны "из коробки" в React Native, и иногда может потребоваться создавать собственные модули для их интеграции. Это может увеличить сложность проекта и время разработки.
+    \item Разработка и поддержка третьих компонентов: Использование сторонних библиотек и компонентов может привести к проблемам с обновлениями и поддержкой, особенно если эти компоненты зависят от нативного кода. Разработчикам приходится тщательно выбирать и проверять сторонние компоненты перед использованием их в проекте.
+    \item Изменения в платформах: Из-за быстрого развития мобильных платформ иногда могут возникать задержки в поддержке новых функций и изменений API в React Native. В таких случаях разработчики могут столкнуться с необходимостью самостоятельно реализовывать эти функции или ждать обновлений фреймворка.
+    \item Обучение и освоение: Несмотря на то что React Native использует популярный язык программирования JavaScript и библиотеку React, разработчикам все равно потребуется время на освоение специфики фреймворка и его компонентов. Кроме того, знание платформо-специфических особенностей и API может быть необходимым для эффективной работы с React Native.
+\end{enumerate}
+
+В целом, React Native является мощным и гибким инструментом для кросс-платформенной разработки, который подходит для создания множества разных типов приложений. Однако его эффективность и применимость в конкретных проектах зависят от ряда факторов, таких как сложность приложения, требования к производительности, доступность сторонних библиотек и компонентов, а также опыт и знания разработчиков. В некоторых случаях, использование React Native может быть оптимальным решением для разработки мультиплатформенного приложения, но в других ситуациях может быть предпочтительнее рассмотреть альтернативные технологии или нативную разработку.
+
+\subsubsection{Flutter}
+
+Flutter - это открытый фреймворк для разработки мультиплатформенных приложений, разработанный Google. Он позволяет создавать красивые и высокопроизводительные приложения для iOS, Android, Web и Desktop с использованием единого кодовой базы. Flutter использует язык программирования Dart, который также был разработан Google.
+
+Преимущества Flutter:
+
+\begin{enumerate}
+    \item Горячая перезагрузка~\cite{FlutterHotReload}: Flutter также поддерживает горячую перезагрузку, что позволяет разработчикам видеть результат изменений кода в реальном времени, без необходимости перезапуска приложения. Это ускоряет процесс разработки и сокращает время на отладку.
+    \item Встроенные виджеты и дизайн: Flutter предлагает обширный набор встроенных виджетов, которые отлично адаптируются под разные платформы и экраны. Это позволяет создавать привлекательные и отзывчивые пользовательские интерфейсы с минимальными усилиями. Кроме того, Flutter поддерживает Material Design~\cite{FlutterMaterial} и Cupertino~\cite{FlutterCupertino} стили, что облегчает создание приложений, соответствующих стандартам дизайна каждой платформы.
+    \item Высокая производительность: Благодаря тому, что Flutter использует Dart и компилирует код в нативный ARM или x86, приложения на Flutter имеют высокую производительность, сопоставимую с нативными приложениями.
+    \item Поддержка разных платформ: Flutter поддерживает разработку приложений не только для iOS и Android, но и для веб-приложений и настольных приложений (Windows, macOS, Linux), что делает его еще более гибким и мощным инструментом для разработчиков.
+    \item Активное сообщество и поддержка: Сообщество разработчиков Flutter активно растет, и Google продолжает вкладывать ресурсы в его развитие. Это обеспечивает хорошую поддержку, доступность обучающих материалов и сторонних библиотек, а также регулярные обновления фреймворка.
+\end{enumerate}
+
+Однако Flutter также имеет свои недостатки:
+
+\begin{enumerate}
+    \item Зависимость от Dart: Flutter использует язык программирования Dart, который может быть незнакомым для многих разработчиков. Несмотря на то что Dart легко освоить, особенно для тех, кто знаком с JavaScript или Java, потребуется время на обучение и практику для эффективной работы с этим языком.
+    \item Размер приложений: Приложения, созданные с использованием Flutter, могут иметь больший размер по сравнению с нативными приложениями. Это связано с тем, что Flutter включает собственный движок для отрисовки, что увеличивает размер итогового пакета. Хотя это не всегда является критическим недостатком, в некоторых случаях это может повлиять на время загрузки и использование памяти на устройствах пользователей.
+    \item Доступность сторонних библиотек и плагинов: Несмотря на растущее сообщество и активное развитие, количество сторонних библиотек и плагинов для Flutter меньше, чем для некоторых других платформ, таких как React Native. В некоторых случаях, разработчикам придется создавать собственные решения или адаптировать существующие библиотеки для их нужд.
+\end{enumerate}
+
+В целом, Flutter является мощным и гибким инструментом для разработки мультиплатформенных приложений. Он подходит для проектов различного масштаба и сложности, благодаря своим преимуществам, таким как высокая производительность, красивый и адаптивный дизайн, и поддержка различных платформ. Однако, перед началом работы с Flutter, разработчикам следует учесть потенциальные недостатки, такие как необходимость изучения языка программирования Dart, увеличенный размер приложений и ограниченное количество сторонних библиотек и плагинов.
+
+\subsubsection{Kotlin Multiplatform}
+
+Kotlin Multiplatform - это инновационный подход к разработке мультиплатформенных приложений, предложенный командой JetBrains, создателями языка программирования Kotlin. Kotlin Multiplatform позволяет использовать одну общую кодовую базу для разработки приложений под разные платформы, такие как Android, iOS, Web, Desktop (Windows, macOS, Linux), и даже серверные приложения.
+
+Основные преимущества Kotlin Multiplatform:
+
+\begin{enumerate}
+    \item Общий код: Kotlin Multiplatform позволяет разработчикам писать общий код для разных платформ, что сокращает время разработки, упрощает поддержку и обновление приложений, и обеспечивает единообразие функциональности на всех платформах.
+    \item Взаимодействие с нативными API: В отличие от некоторых других кросс-платформенных решений, Kotlin Multiplatform предоставляет возможность прямого взаимодействия с нативными API каждой платформы, что позволяет создавать высокопроизводительные и адаптированные приложения.
+    \item Гибкость: Kotlin Multiplatform позволяет разработчикам выбирать степень объединения кода между платформами. Разработчики могут решить, какие части кода будут общими, а какие останутся платформо-зависимыми. Это обеспечивает гибкость в выборе архитектуры приложения и позволяет сохранить преимущества нативной разработки.
+    \item Интеграция с существующими проектами: Kotlin Multiplatform может быть внедрен в уже существующие проекты, что позволяет разработчикам постепенно переходить на использование общего кода без необходимости переписывать приложение с нуля.
+    \item Поддержка сообщества и экосистема: Kotlin получил широкую популярность среди разработчиков и активно поддерживается сообществом. Это означает, что разработчики имеют доступ к большому количеству библиотек, инструментов и ресурсов, которые могут помочь в разработке мультиплатформенных приложений на Kotlin.
+    \item Мультиплатформенный пользовательский интерфейс: помимо инструмента для общего написания бизнес-логики приложения (Kotlin Multiplatform), JetBrains также разрабатывает инструмент для мультиплатформенного пользовательского интерфейса, Compose Multiplatform. Данная фреймворк разрабатывается на основе разрабатываемого Google фреймворка для пользовательского интерфейса для Android, Jetpack Compose, имеет совместимость с инструментом Google, и помимо Android может быть использован для Web, Desktop, и, с недавнего времени, iOS~\cite{ComposeMPiOS}.
+\end{enumerate}
+
+Несмотря на множество преимуществ, Kotlin Multiplatform также имеет свои недостатки:
+
+\begin{enumerate}
+    \item Относительно новая технология: Kotlin Multiplatform является сравнительно новым решением на рынке, и его экосистема все еще развивается. Это может означать меньшее количество доступных ресурсов и библиотек по сравнению с более зрелыми кросс-платформенными решениями.
+    \item Более сложный процесс разработки графического пользовательского интерфейса: Несмотря на возможность писать мультиплатформенный графический пользовательский интерфейс, без глобальных модификаций под каждую платформу выглядеть в соответствиями с привычными интерфейсами под платформы он будет только на Android. Чтобы интерфейс выглядел "нативно" iOS, Web и Desktop потребуются значительные доработки или использование других способов написания пользовательского интерфейса
+    \item Библиотека для написания общего пользовательского интерфейса ещё не является стабильной для всех платформ: Compose Multiplatform официально считается стабильным только для Android и Desktop. Для Web данный инструмент еще в эксперементальной стадии разработки, для iOS на момент написания выпущена только Alpha версия библиотеки~\cite{ComposeMPiOS}.
+\end{enumerate}
+
+В целом, Kotlin Multiplatform является перспективным и гибким решением для разработки мультиплатформенных приложений, которое может облегчить процесс разработки, сократить затраты на поддержку и обновление, и улучшить качество продукта. Однако, как и любой другой инструмент, он имеет свои преимущества и недостатки, которые следует учитывать при выборе технологии для конкретного проекта.
+
+\subsection{Подведение итогов и выбор технологии для дальнейшего разбора}
+
+В результате анализа различных кросс-платформенных технологий и нативной разработки были выявлены их ключевые преимущества и недостатки. Нативная разработка предоставляет наилучшую производительность и интеграцию с платформами, но может быть ресурсоемкой и сложной в поддержке. Xamarin, React Native и Flutter предлагают разные подходы к разработке мультиплатформенных приложений, каждый со своими особенностями, возможностями и ограничениями.
+
+Kotlin Multiplatform, в свою очередь, предлагает уникальный и гибкий подход, позволяющий разработчикам определить, какие части кода будут общими, а какие останутся платформо-зависимыми. Это обеспечивает возможность сохранить преимущества нативной разработки и одновременно сократить затраты на поддержку и обновление приложений.
+
+Учитывая проведенный анализ, а также возможности, которые предоставляет Kotlin Multiplatform, было принято решение выбрать данную технологию для дальнейшего разбора и применения в разработке приложения. Kotlin Multiplatform обеспечивает поддержку разных платформ, включая Android, iOS, и Desktop, что делает его универсальным решением для создания современных приложений. 
+
+Основываясь на гибкости, перспективности и возможности совмещения с нативными платформами, Kotlin Multiplatform может быть оптимальным выбором для данного проекта. В следующих разделах работы будет рассмотрена детальная информация о Kotlin Multiplatform, его особенностях, архитектуре, возможностях и примерах применения в реальных проектах.
+
+\section{Разбор выбранной технологии}\label{Sect::kotlinmp}
+
+\subsection{Введение в Kotlin Multiplatform}
+
+В данной главе будет рассмотрена технология Kotlin Multiplatform, которая была выбрана на основе сравнительного анализа в предыдущей главе. Kotlin Multiplatform представляет собой решение для разработки кросс-платформенных приложений, позволяющее использовать одну кодовую базу для создания приложений на разных платформах, таких как Android, iOS, Web и десктоп.
+
+\subsubsection{Преимущества Kotlin для разработки приложений}
+
+Kotlin предлагает ряд преимуществ для разработки приложений, включая:
+\begin{itemize}
+    \item Обратная совместимость с Java: Kotlin полностью совместим с Java, что позволяет разработчикам интегрировать Kotlin в существующие проекты на Java или использовать Java-библиотеки в Kotlin-приложениях.
+    \item Поддержка многопоточности: Kotlin предлагает корутины работы с многопоточностью, которые позволяют разработчикам эффективно управлять параллелизмом и асинхронностью в своих приложениях.
+    \item Упрощение обслуживания и обновления: Kotlin Multiplatform упрощает обновление и поддержку приложений, так как разработчики могут использовать одну кодовую базу для всех платформ, что обеспечивает более быструю разработку и устранение ошибок.
+\end{itemize}
+
+\subsection{Поддержка разных платформ}
+
+Как уже было сказано ранее, Kotlin Multiplatform предоставляет возможность использовать общий код для разработки приложений на разных платформах, таких как JVM/Android, Native (iOS, Desktop), WASM и JavaScript (Web). Это позволяет значительно сократить время разработки и обеспечивает удобство сопровождения приложений.
+
+\subsubsection{JVM/Android}
+
+Kotlin имеет сильную интеграцию с экосистемой Java и средой выполнения Java (JVM). Это обеспечивает разработчикам возможность использовать все преимущества Kotlin, такие как безопасность, совместимость и производительность, при создании приложений на платформе Android~\cite{KotlinAndroid}, а также серверных приложений~\cite{KotlinServer}. Благодаря тесной интеграции с Android Studio и Intellij IDEA, разработчики могут комбинировать Kotlin и Java код в одном проекте и использовать обширную базу существующих Java-библиотек.
+
+\subsubsection{Native}
+
+Kotlin/Native~\cite{KotlinNative} --- это вариант компилятора Kotlin, который позволяет компилировать код на нативный исполняемый файл для различных платформ, таких как iOS, macOS, Linux, и Windows. Kotlin/Native основан на компиляторе LLVM и предоставляет доступ к нативным API платформы. Таким образом, разработчики могут создавать производительные и нативные приложения на Kotlin для мобильных и настольных платформ.
+
+\subsubsection{JS и WebAssembly (WASM)} % без кода
+
+Kotlin/JS~\cite{KotlinJS} --- это бэкенд компилятора Kotlin Multiplatform, который позволяет использовать Kotlin для разработки веб-приложений. С помощью Kotlin/JS разработчики могут писать код на языке Kotlin, который затем компилируется в JavaScript. Это обеспечивает совместимость с существующими библиотеками и инфраструктурой JavaScript, а также предоставляет возможность использовать преимущества Kotlin, такие как типобезопасность, расширения функций и более чистый синтаксис.
+
+Kotlin/JS может быть скомпилирован для использования в браузер и Node.js (на данный момент находится в экспериментальной стадии разработки). Это позволяет разработчикам использовать Kotlin для создания как клиентских, так и серверных приложений, а также использовать одни и те же абстракции и библиотеки на обеих платформах.
+
+Kotlin/WASM (WebAssembly)~\cite{KotlinWASM} --- это еще одна возможность для разработки веб-приложений с использованием Kotlin. WebAssembly - это двоичный формат инструкций для стековой виртуальной машины, предназначенный для выполнения кода на веб-страницах с высокой производительностью. Это позволяет разработчикам писать код на Kotlin и компилировать его в WebAssembly, который может быть выполнен в современных браузерах.
+
+Kotlin/WASM находится на экспериментальной стадии разработки и пока что не так широко используется, как Kotlin/JS. Однако это может стать интересным направлением для будущих веб-проектов, так как WebAssembly предлагает преимущества в производительности и безопасности по сравнению с JavaScript.
+
+В целом, Kotlin/JS и Kotlin/WASM предоставляют разработчикам гибкие инструменты для создания веб-приложений с использованием языка Kotlin, обеспечивая доступ к широкому спектру возможностей и совместимости с существующими технологиями веб-разработки.
+
+\subsection{Разбор компиляции под разные целевые платформы (таргеты)}
+
+Как уже упоминалось ранее, при разработке приложений с использованием Kotlin Multiplatform требуется написать общий код на языке Kotlin. Затем, в зависимости от выбранной конфигурации, этот код компилируется под нужную платформу. В данной секции мы кратко рассмотрим процесс компиляции под различные платформы.
+
+\subsubsection{Общий обзор компиляции в Kotlin Multiplatform}
+
+Процесс компиляции в Kotlin Multiplatform (KMP) основан на использовании Gradle, который обеспечивает автоматизацию сборки проектов. Для того чтобы лучше понять, как происходит компиляция под разные целевые платформы (далее --- таргеты) с помощью Gradle, рассмотрим некоторые теоретические аспекты этого процесса.
+
+Gradle использует систему инкрементальной компиляции, которая обеспечивает быструю сборку измененных частей проекта. Во время компиляции под разные таргеты, Gradle выполняет следующие основные этапы:
+
+\begin{enumerate}
+    \item Анализ исходного кода и зависимостей: Gradle определяет структуру проекта, его модули и зависимости между ними. Исходный код может быть разделен на общий код и платформозависимый код, который хранится в соответствующих модулях и исходных наборах (source sets).
+    \item Компиляция исходного кода: Gradle запускает компиляцию исходного кода для каждого таргета с использованием соответствующих компиляторов. Например, для компиляции под Android, Gradle использует Kotlin/JVM компилятор; для компиляции под iOS - Kotlin/Native компилятор; для компиляции под JavaScript - Kotlin/JS компилятор. Каждый из компиляторов генерирует код, оптимизированный для своей платформы.
+    \item Сборка и связывание: Gradle производит сборку и связывание всех компонентов проекта, таких как библиотеки, ресурсы, и исполняемые файлы, в соответствии с настройками проекта и таргета. В зависимости от платформы, могут использоваться разные инструменты и процессы для этого этапа.
+    \item Тестирование и проверка: Gradle позволяет запускать автоматические тесты и выполнять проверку кода с помощью статического анализа и других инструментов. Этот этап обеспечивает качество кода и корректное функционирование приложения на разных платформах.
+    \item Установка и публикация: После успешной компиляции и проверки, Gradle может автоматически развернуть приложение на устройствах или симуляторах для тестирования и отладки. Кроме того, Gradle поддерживает публикацию скомпилированных артефактов, таких как библиотеки и приложения, в удаленные репозитории или магазины приложений.
+\end{enumerate}
+
+Процесс компиляции в Gradle для разных платформ основан на плагинах, которые обеспечивают поддержку соответствующих компиляторов и инструментов. Например, Kotlin Multiplatform Plugin добавляет поддержку Kotlin компиляторов для разных платформ и позволяет настроить проект для мультиплатформенной разработки.
+
+\subsubsection{Особенности компиляции для разных платформ}
+
+\begin{itemize}
+    \item Android: Компиляция для Android включает несколько шагов, таких как компиляция Kotlin кода в JVM байт-код, преобразование Java и Kotlin байт-кода в DEX-файлы, упаковка ресурсов, и создание APK или AAB файла.
+    \item iOS: Для компиляции кода под iOS, Kotlin/Native компилирует Kotlin код в нативные исполняемые файлы для конкретной платформы. В процессе сборки, Gradle выполняет задачи, связанные с компиляцией кода, созданием исполняемых файлов, и интеграцией с Xcode для сборки и установки приложения на устройство или симулятор.
+    \item JS: Для компиляции Kotlin кода в JavaScript, Gradle использует Kotlin/JS, который транслирует Kotlin код в эквивалентный JavaScript код. В случае с браузерными приложениями, Gradle также может упаковывать ресурсы и создавать HTML-шаблон с подключением скомпилированного JS-файла.
+    \item WebAssembly (WASM): Хотя поддержка компиляции Kotlin кода в WebAssembly находится на экспериментальной стадии, Gradle взаимодействует с Kotlin/WASM для генерации WASM-файлов. В процессе компиляции, Kotlin код транслируется в промежуточный LLVM-код, который затем компилируется в WebAssembly.
+\end{itemize}
+
+\subsubsection{Использование механизма "ожидание"(expect)-"актуализация"(actual)}
+
+В мультиплатформенных проектах на Kotlin Multiplatform, механизмы expect и actual позволяют реализовывать платформо-специфический код и обеспечивать его взаимодействие с общим кодом.~\cite{KotlinExpectActual}
+
+\begin{enumerate}
+    \item Объявление expect: в общем коде используются объявления expect для указания функций, классов, свойств или объектов, которые должны быть реализованы для каждой платформы. Объявления expect не содержат реализации и представляют собой контракт, который должен быть удовлетворен платформо-специфическим кодом. В листинге~\ref{lst:expect_example} представлен пример объявления такой функции.
+    
+    \item Объявление actual: в платформо-специфических исходных наборах используются объявления actual для реализации expect-объявлений из общего кода. Объявление actual должно соответствовать сигнатуре expect-объявления и предоставлять платформо-специфическую реализацию. В листингах~\ref{lst:actual_android},\ref{lst:actual_ios} представлены примеры реализаций таких функций для Android и iOS
+
+    \item Использование expect и actual в коде: в общем коде можно вызывать функции, классы, свойства или объекты, объявленные с использованием expect, без знания о конкретной платформе. Во время компиляции и выполнения, платформо-специфические реализации actual будут использоваться вместо expect-объявлений, обеспечивая корректное поведение на каждой платформе.
+    
+\end{enumerate}
+
+\begin{listing}[h]
+\caption{Пример объявления expect функции}
+\label{lst:expect_example}
+\begin{minted}[frame=single,fontsize = \footnotesize, linenos, xleftmargin = 1.5em]{kotlin}
+expect fun getPlatformName(): String
+\end{minted}
+\end{listing}
+
+\begin{listing}[h]
+\caption{Пример объявления actual функции для Android}
+\label{lst:actual_android}
+\begin{minted}[frame=single,fontsize = \footnotesize, linenos, xleftmargin = 1.5em]{kotlin}
+actual fun getPlatformName(): String {
+    return "Android"
+}
+\end{minted}
+\end{listing}
+
+\begin{listing}[h]
+\caption{Пример объявления actual функции для iOS}
+\label{lst:actual_ios}
+\begin{minted}[frame=single,fontsize = \footnotesize, linenos, xleftmargin = 1.5em]{kotlin}
+actual fun getPlatformName(): String {
+    return "iOS"
+}
+\end{minted}
+\end{listing}
+
+\begin{listing}[!h]
+\caption{Пример использование expect функции из общего кода}
+\label{lst:expect_usage}
+\begin{minted}[frame=single,fontsize = \footnotesize, linenos, xleftmargin = 1.5em]{kotlin}
+fun printPlatformName() {
+    println("Running on ${getPlatformName()}")
+}
+\end{minted}
+\end{listing}
+
+\section{Разработка приложения}
+.
+\subsection{Настройка проекта}
+.
+\subsubsection{Многомодульность в контексте gradle}
+.
+\subsubsection{Выбор и подключение библиотек}
+.
+\subsubsection{Convention plugins --- выбрать русский аналог для термина}
+.
+\subsubsection{Общие и платформенные модули}
+.
+\subsubsection{Подключение в iOS проект}
+.
+\subsubsection{Что-то про инфраструктуру (CI/CD) --- не уверен , что точно надо}
+.
+\subsection{Написание общего кода}
+.
+\subsubsection{Сетевые запросы --- ktor}
+.
+\subsubsection{База данных --- SQLDelight}
+.
+\subsubsection{Про другие либы тоже что-то стоит}
+.
+\subsection{Платформенный код}
+.
+\subsubsection{Настройка библиотек для использования на разных платформах}
+.
+\subsubsection{UI для Desktop и Android --- Compose Multiplatform}
+.
+\subsubsection{UI для iOS --- SwitfUI/UIKit, пока не определился, но скорее первое}
+.
+\section{Тестирование приложения}
+.
+\subsection{Хорошо бы покрыть код unit, ui тестами и написать тут}
+.
+\subsection{Скриншоты страниц под iOS Android Desktop}
+.
+\anonsection{ЗАКЛЮЧЕНИЕ} 
+.
+
+
+\renewcommand\refname{СПИСОК ИСПОЛЬЗОВАННЫХ ИСТОЧНИКОВ}
+% Список литературы
+\clearpage
+%\bibliographystyle{ugost2008s}  %utf8gost71u.bst} %utf8gost705u} %gost2008s}
+{\catcode`"\active\def"{\relax}
+\addcontentsline{toc}{section}{\protect\numberline{}\refname}%
+%\bibliography{biblio} %здесь ничего не меняем, кроме, возможно, имени bib-файла
+\printbibliography
+}
+\newpage
+\settocdepth{section}
+
+\end{document}
